@@ -93,7 +93,7 @@
 
     <section class="section" id="real-world" aria-labelledby="real-h">
       <h2 id="real-h">Real-World Experiments</h2>
-      <p class="setup"><strong>TUCO lifts real-robot success from 25.8% to 85.8% with only 10 real demonstrations per task.</strong> Each task is learned from only 10 real demonstrations, recorded as successful rollouts on the robot, far too few to train a policy on their own (16.7% average success). We then add simulated demonstrations of the same task: either all 1,200 generated in simulation, or 600 of them chosen by a curation method, always at the same real-to-simulation mixing ratio. Every policy is evaluated over 40 trials on a Franka arm. The question is whether choosing those 600 well can turn 10 real demonstrations into a working policy.</p>
+      <p class="setup"><strong>TUCO lifts real-robot success from 25.8% to 85.8% with only 10 real demonstrations per task.</strong> Each task is learned from only 10 teleoperated real demonstrations, far too few to train a policy on their own (16.7% average success). We then add simulated demonstrations of the same task: either all 1,200 generated in simulation, or 600 of them chosen by a curation method, always at the same real-to-simulation mixing ratio. Every policy is evaluated over 40 trials on a Franka arm. The question is whether choosing those 600 well can turn 10 real demonstrations into a working policy.</p>
 
       <figure class="chart" id="success-chart">
         <h3 class="chart-title" id="chart-title">Real-robot success rate</h3>
