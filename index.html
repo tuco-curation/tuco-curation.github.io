@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>TUCO: Curating Simulation Demonstrations for Sim-to-Real Robot Policy Co-Training</title>
+<meta name="description" content="TUCO lifts real-robot success from 25.8% to 85.8% with only 10 real demonstrations per task.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="TUCO: Curating Simulation Demonstrations for Sim-to-Real Robot Policy Co-Training">
+<meta property="og:description" content="TUCO lifts real-robot success from 25.8% to 85.8% with only 10 real demonstrations per task.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%236a3d9a'/%3E%3Cpath d='M9 10h14v3h-5.5v12h-3V13H9z' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&amp;display=swap">
+<link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<div class="page">
+
+  <header class="hero">
+    <h1 class="title">
+      <span class="title-acr">TUCO</span><span class="vh">: </span>
+      <span class="title-sub">Curating Simulation Demonstrations for Sim-to-Real Robot Policy Co-Training</span>
+    </h1>
+    <p class="authors">
+      <span class="author">Ning Zhu<sup>1,*</sup></span>
+      <span class="author">Mengfei Zhao<sup>2,3,*</sup></span>
+      <span class="author">Yikai Tang<sup>4,*</sup></span>
+      <span class="author">Zhangyujie Sun<sup>5</sup></span>
+      <span class="author">Peihao Li<sup>6</sup></span>
+      <span class="author">Dongyue Ni<sup>7</sup></span>
+      <span class="author">Jindou Jia<sup>2,†</sup></span>
+      <span class="author">Jianfei Yang<sup>2,†</sup></span>
+    </p>
+    <p class="affiliations">
+      <span><sup>1</sup>Stanford University</span>
+      <span><sup>2</sup>Nanyang Technological University</span>
+      <span><sup>3</sup>AXIS Robotics</span>
+      <span><sup>4</sup>Carnegie Mellon University</span>
+      <span><sup>5</sup>Fudan University</span>
+      <span><sup>6</sup>University of California, Berkeley</span>
+      <span><sup>7</sup>Shanghai Jiao Tong University</span>
+    </p>
+    <p class="equal">* Equal contribution. † Corresponding authors.</p>
+    <nav class="links" aria-label="Paper resources">
+      <a class="pill" href="assets/TUCO_paper.pdf">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>
+        <span>Paper</span>
+      </a>
+      <span class="pill is-disabled" role="link" aria-disabled="true">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5V5a2 2 0 0 1 2-2h13v15H6a2 2 0 0 0-2 2zM8 7h7"/></svg>
+        <span>arXiv <small>coming soon</small></span>
+      </span>
+      <span class="pill is-disabled" role="link" aria-disabled="true">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5"/></svg>
+        <span>Code <small>coming soon</small></span>
+      </span>
+    </nav>
+  </header>
+
+  <main id="main">
+
+    <div class="teaser" id="teaser">
+      <video controls preload="metadata" playsinline poster="assets/teaser_poster.jpg" width="1920" height="1080" aria-label="TUCO teaser video">
+        <source src="assets/TUCO_intro_video.mp4" type="video/mp4">
+        <a href="assets/TUCO_intro_video.mp4">Download the teaser video (MP4)</a>
+      </video>
+    </div>
+
+    <section class="section" id="abstract" aria-labelledby="abstract-h">
+      <h2 id="abstract-h">Abstract</h2>
+      <p class="justify">Simulation demonstrations can supplement scarce real-world data for robot policy co-training. However, the value of using data curation to actively select these demonstrations for sim-to-real co-training remains underexplored. Existing curation methods also lack a unified criterion for measuring trajectory-level utility and set-level coverage from closed-loop target behavior. To address these gaps, we present the first systematic study of data curation for sim-to-real robot policy co-training and propose Trajectory-level Utility and set-level Coverage Optimization (TUCO). TUCO uses influence functions to trace how each source demonstration affects target-domain scoring rollouts. Our key insight is that these effects can be decomposed into an overall contribution to target return and variation across rollouts, providing a common closed-loop basis for measuring trajectory utility and set coverage. We further propose a performance-aligned subset optimizer that combines these measures in a unified curation objective to reduce redundancy and select complementary demonstrations. Extensive experiments on RoboMimic and OmniReset establish the value of active simulation data curation for sim-to-real policy co-training and show that TUCO achieves state-of-the-art performance across single-simulator, sim-to-sim, and sim-to-real settings.</p>
+    </section>
+
+    <section class="section" id="method" aria-labelledby="method-h">
+      <h2 id="method-h">Method</h2>
+      <p class="intro">Sim-to-real co-training combines a large pool of simulated demonstrations with a small set of real ones. Under a domain gap, these simulated demonstrations differ in their value to the target policy, and some are redundant or harmful. TUCO selects a subset of them according to their effect on the target policy's closed-loop performance, estimated with influence functions on target-domain rollouts.</p>
+      <figure class="fig">
+        <a class="zoom" href="assets/fig_overview-2000.jpg" data-full="assets/full/fig_overview.png">
+          <img src="assets/fig_overview-1200.jpg" srcset="assets/fig_overview-1200.jpg 1200w, assets/fig_overview-2000.jpg 2000w" sizes="(min-width: 992px) 960px, calc(100vw - 32px)" width="2000" height="1095" loading="lazy" decoding="async" alt="Overview of TUCO in four panels: A, closed-loop influence profiles computed from target-domain scoring rollouts; B, decomposition of each influence profile into trajectory utility and a coverage vector; C, performance-aligned subset optimization with a feasible cone and greedy utility-coverage selection; D, co-training on all target demonstrations plus the curated source demonstrations.">
+        </a>
+      </figure>
+      <ul class="points steps">
+        <li><strong>A. Score each simulated demonstration against target rollouts.</strong> We collect rollouts of a base policy in the target domain, each with its return. For each simulated demonstration, an influence function answers a counterfactual question: if this demonstration carried more weight in training, which of those rollouts would become more likely and which less? The answers form the demonstration's influence profile, one number per rollout.</li>
+        <li><strong>B. Read two quantities off each profile.</strong> Projecting the profile onto the rollout returns gives the demonstration's utility, its net push toward success. What remains is its coverage vector, the pattern of which individual rollouts it helps. Two demonstrations with equal utility but different coverage vectors teach the policy different things; two with similar vectors are redundant.</li>
+        <li><strong>C. Select a set, not a ranking.</strong> We discard candidates whose influence points away from success, then add demonstrations one at a time, preferring high utility and a coverage vector that adds a direction the chosen set does not yet span. The selected demonstrations are then co-trained with all target demonstrations (panel D).</li>
+      </ul>
+    </section>
+
+    <section class="section" id="real-world" aria-labelledby="real-h">
+      <h2 id="real-h">Real-World Experiments</h2>
+      <p class="setup"><strong>TUCO lifts real-robot success from 25.8% to 85.8% with only 10 real demonstrations per task.</strong> Each task is learned from only 10 real demonstrations, recorded as successful rollouts on the robot, far too few to train a policy on their own (16.7% average success). We then add simulated demonstrations of the same task: either all 1,200 generated in simulation, or 600 of them chosen by a curation method, always at the same real-to-simulation mixing ratio. Every policy is evaluated over 40 trials on a Franka arm. The question is whether choosing those 600 well can turn 10 real demonstrations into a working policy.</p>
+
+      <figure class="chart" id="success-chart">
+        <h3 class="chart-title" id="chart-title">Real-robot success rate</h3>
+        <ul class="chart-legend" aria-label="Legend">
+          <li class="key-ours"><svg class="key" viewBox="0 0 24 12" aria-hidden="true"><line x1="0" x2="24" y1="6" y2="6" stroke="#6a3d9a" stroke-width="3"/><circle cx="12" cy="6" r="4.5" fill="#6a3d9a" stroke="#fff" stroke-width="1.5"/></svg>TUCO (ours)</li>
+          <li class="key-method"><svg class="key" viewBox="0 0 24 12" aria-hidden="true"><line x1="0" x2="24" y1="6" y2="6" stroke="#2a78d6" stroke-width="2"/><circle cx="12" cy="6" r="3.5" fill="#2a78d6" stroke="#fff" stroke-width="1.5"/></svg>CUPID</li>
+          <li class="key-method"><svg class="key" viewBox="0 0 24 12" aria-hidden="true"><line x1="0" x2="24" y1="6" y2="6" stroke="#eb6834" stroke-width="2"/><circle cx="12" cy="6" r="3.5" fill="#eb6834" stroke="#fff" stroke-width="1.5"/></svg>DataMIL</li>
+          <li class="key-method"><svg class="key" viewBox="0 0 24 12" aria-hidden="true"><line x1="0" x2="24" y1="6" y2="6" stroke="#1baf7a" stroke-width="2"/><circle cx="12" cy="6" r="3.5" fill="#1baf7a" stroke="#fff" stroke-width="1.5"/></svg>FAKTUAL</li>
+          <li class="key-method"><svg class="key" viewBox="0 0 24 12" aria-hidden="true"><line x1="0" x2="24" y1="6" y2="6" stroke="#eda100" stroke-width="2"/><circle cx="12" cy="6" r="3.5" fill="#eda100" stroke="#fff" stroke-width="1.5"/></svg>Success Similarity</li>
+          <li class="key-method"><svg class="key" viewBox="0 0 24 12" aria-hidden="true"><line x1="0" x2="24" y1="6" y2="6" stroke="#e87ba4" stroke-width="2"/><circle cx="12" cy="6" r="3.5" fill="#e87ba4" stroke="#fff" stroke-width="1.5"/></svg>Random</li>
+          <li class="key-ref"><svg class="key" viewBox="0 0 24 12" aria-hidden="true"><line x1="0" x2="24" y1="6" y2="6" stroke="#8a8694" stroke-width="2" stroke-dasharray="7 4"/><circle cx="12" cy="6" r="3.5" fill="#8a8694" stroke="#fff" stroke-width="1.5"/></svg>All sim data (10 real + 1,200 sim)</li>
+          <li class="key-ref"><svg class="key" viewBox="0 0 24 12" aria-hidden="true"><line x1="0" x2="24" y1="6" y2="6" stroke="#a9a5b2" stroke-width="2" stroke-dasharray="2 3"/><circle cx="12" cy="6" r="3.5" fill="#a9a5b2" stroke="#fff" stroke-width="1.5"/></svg>10 real demos only</li>
+        </ul>
+        <div class="chart-plot" data-chart>
+          <svg xmlns="http://www.w3.org/2000/svg" class="chart-svg" width="960" height="420" viewBox="0 0 960 420" role="img" aria-labelledby="chart-title chart-desc" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif"><desc id="chart-desc">Line chart of real-robot success rate (%) for eight methods on Peg, StackCube, CupCake and their average. TUCO (ours): 82.5, 75.0, 100.0, average 85.8. Full values are listed under "Show values" below the chart.</desc><rect x="0" y="0" width="960" height="420" fill="#ffffff"/><line x1="46" x2="808" y1="386.0" y2="386.0" stroke="#d9d6e0" stroke-width="1"/><text x="38" y="386.0" dy="0.35em" text-anchor="end" font-size="12" fill="#6c6877">0%</text><line x1="46" x2="808" y1="297.0" y2="297.0" stroke="#ecebf0" stroke-width="1"/><text x="38" y="297.0" dy="0.35em" text-anchor="end" font-size="12" fill="#6c6877">25%</text><line x1="46" x2="808" y1="208.0" y2="208.0" stroke="#ecebf0" stroke-width="1"/><text x="38" y="208.0" dy="0.35em" text-anchor="end" font-size="12" fill="#6c6877">50%</text><line x1="46" x2="808" y1="119.0" y2="119.0" stroke="#ecebf0" stroke-width="1"/><text x="38" y="119.0" dy="0.35em" text-anchor="end" font-size="12" fill="#6c6877">75%</text><line x1="46" x2="808" y1="30.0" y2="30.0" stroke="#ecebf0" stroke-width="1"/><text x="38" y="30.0" dy="0.35em" text-anchor="end" font-size="12" fill="#6c6877">100%</text><text x="74.0" y="408" text-anchor="middle" font-size="12.5" fill="#3a3743">Peg</text><text x="309.3" y="408" text-anchor="middle" font-size="12.5" fill="#3a3743">StackCube</text><text x="544.7" y="408" text-anchor="middle" font-size="12.5" fill="#3a3743">CupCake</text><text x="780.0" y="408" text-anchor="middle" font-size="12.5" fill="#3a3743" font-weight="600">Average</text><g class="series series-ref" data-name="All sim data (10 real + 1,200 sim)"><polyline points="74.0,323.7 309.3,243.6 544.7,314.8 780.0,294.2" fill="none" stroke="#8a8694" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="7 4"/><circle cx="74.0" cy="323.7" r="4" fill="#8a8694" stroke="#ffffff" stroke-width="2"/><circle cx="309.3" cy="243.6" r="4" fill="#8a8694" stroke="#ffffff" stroke-width="2"/><circle cx="544.7" cy="314.8" r="4" fill="#8a8694" stroke="#ffffff" stroke-width="2"/><circle cx="780.0" cy="294.2" r="4" fill="#8a8694" stroke="#ffffff" stroke-width="2"/></g><g class="series series-ref" data-name="10 real demos only"><polyline points="74.0,332.6 309.3,261.4 544.7,386.0 780.0,326.5" fill="none" stroke="#a9a5b2" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="2 3"/><circle cx="74.0" cy="332.6" r="4" fill="#a9a5b2" stroke="#ffffff" stroke-width="2"/><circle cx="309.3" cy="261.4" r="4" fill="#a9a5b2" stroke="#ffffff" stroke-width="2"/><circle cx="544.7" cy="386.0" r="4" fill="#a9a5b2" stroke="#ffffff" stroke-width="2"/><circle cx="780.0" cy="326.5" r="4" fill="#a9a5b2" stroke="#ffffff" stroke-width="2"/></g><g class="series series-method" data-name="CUPID"><polyline points="74.0,119.0 309.3,154.6 544.7,101.2 780.0,125.1" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><circle cx="74.0" cy="119.0" r="4" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/><circle cx="309.3" cy="154.6" r="4" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/><circle cx="544.7" cy="101.2" r="4" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/><circle cx="780.0" cy="125.1" r="4" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/></g><g class="series series-method" data-name="DataMIL"><polyline points="74.0,305.9 309.3,154.6 544.7,30.0 780.0,163.5" fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><circle cx="74.0" cy="305.9" r="4" fill="#eb6834" stroke="#ffffff" stroke-width="2"/><circle cx="309.3" cy="154.6" r="4" fill="#eb6834" stroke="#ffffff" stroke-width="2"/><circle cx="544.7" cy="30.0" r="4" fill="#eb6834" stroke="#ffffff" stroke-width="2"/><circle cx="780.0" cy="163.5" r="4" fill="#eb6834" stroke="#ffffff" stroke-width="2"/></g><g class="series series-method" data-name="FAKTUAL"><polyline points="74.0,350.4 309.3,119.0 544.7,30.0 780.0,166.3" fill="none" stroke="#1baf7a" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><circle cx="74.0" cy="350.4" r="4" fill="#1baf7a" stroke="#ffffff" stroke-width="2"/><circle cx="309.3" cy="119.0" r="4" fill="#1baf7a" stroke="#ffffff" stroke-width="2"/><circle cx="544.7" cy="30.0" r="4" fill="#1baf7a" stroke="#ffffff" stroke-width="2"/><circle cx="780.0" cy="166.3" r="4" fill="#1baf7a" stroke="#ffffff" stroke-width="2"/></g><g class="series series-method" data-name="Success Similarity"><polyline points="74.0,368.2 309.3,208.0 544.7,172.4 780.0,249.7" fill="none" stroke="#eda100" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><circle cx="74.0" cy="368.2" r="4" fill="#eda100" stroke="#ffffff" stroke-width="2"/><circle cx="309.3" cy="208.0" r="4" fill="#eda100" stroke="#ffffff" stroke-width="2"/><circle cx="544.7" cy="172.4" r="4" fill="#eda100" stroke="#ffffff" stroke-width="2"/><circle cx="780.0" cy="249.7" r="4" fill="#eda100" stroke="#ffffff" stroke-width="2"/></g><g class="series series-method" data-name="Random"><polyline points="74.0,359.3 309.3,181.3 544.7,341.5 780.0,294.2" fill="none" stroke="#e87ba4" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><circle cx="74.0" cy="359.3" r="4" fill="#e87ba4" stroke="#ffffff" stroke-width="2"/><circle cx="309.3" cy="181.3" r="4" fill="#e87ba4" stroke="#ffffff" stroke-width="2"/><circle cx="544.7" cy="341.5" r="4" fill="#e87ba4" stroke="#ffffff" stroke-width="2"/><circle cx="780.0" cy="294.2" r="4" fill="#e87ba4" stroke="#ffffff" stroke-width="2"/></g><g class="series series-ours" data-name="TUCO (ours)"><polyline points="74.0,92.3 309.3,119.0 544.7,30.0 780.0,80.6" fill="none" stroke="#6a3d9a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><circle cx="74.0" cy="92.3" r="5" fill="#6a3d9a" stroke="#ffffff" stroke-width="2"/><circle cx="309.3" cy="119.0" r="5" fill="#6a3d9a" stroke="#ffffff" stroke-width="2"/><circle cx="544.7" cy="30.0" r="5" fill="#6a3d9a" stroke="#ffffff" stroke-width="2"/><circle cx="780.0" cy="80.6" r="5" fill="#6a3d9a" stroke="#ffffff" stroke-width="2"/></g><g class="tuco-values"><text x="74.0" y="81.3" text-anchor="middle" font-size="12.5" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="4" stroke-linejoin="round" aria-hidden="true">82.5</text><text x="74.0" y="81.3" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1c1a22">82.5</text><text x="309.3" y="108.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="4" stroke-linejoin="round" aria-hidden="true">75.0</text><text x="309.3" y="108.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1c1a22">75.0</text><text x="544.7" y="19.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="4" stroke-linejoin="round" aria-hidden="true">100.0</text><text x="544.7" y="19.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1c1a22">100.0</text><text x="780.0" y="69.6" text-anchor="middle" font-size="12.5" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="4" stroke-linejoin="round" aria-hidden="true">85.8</text><text x="780.0" y="69.6" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1c1a22">85.8</text></g><g class="end-label" data-name="TUCO (ours)"><path d="M787.0 80.6 L793.0 80.6 L798.0 80.6" fill="none" stroke="#6a3d9a" stroke-width="1.5"/><text x="802.0" y="80.6" dy="0.35em" font-size="12.5" font-weight="700" fill="#1c1a22">TUCO (ours)</text></g><g class="end-label" data-name="CUPID"><path d="M787.0 125.1 L793.0 125.1 L798.0 125.1" fill="none" stroke="#2a78d6" stroke-width="1.5"/><text x="802.0" y="125.1" dy="0.35em" font-size="12.5" fill="#3a3743">CUPID</text></g><g class="end-label" data-name="DataMIL"><path d="M787.0 163.5 L793.0 163.5 L798.0 163.5" fill="none" stroke="#eb6834" stroke-width="1.5"/><text x="802.0" y="163.5" dy="0.35em" font-size="12.5" fill="#3a3743">DataMIL</text></g><g class="end-label" data-name="FAKTUAL"><path d="M787.0 166.3 L793.0 166.3 L798.0 182.0" fill="none" stroke="#1baf7a" stroke-width="1.5"/><text x="802.0" y="182.0" dy="0.35em" font-size="12.5" fill="#3a3743">FAKTUAL</text></g><g class="end-label" data-name="Success Similarity"><path d="M787.0 249.7 L793.0 249.7 L798.0 249.7" fill="none" stroke="#eda100" stroke-width="1.5"/><text x="802.0" y="249.7" dy="0.35em" font-size="12.5" fill="#3a3743">Success Similarity</text></g><g class="end-label" data-name="Random"><path d="M787.0 294.2 L793.0 294.2 L798.0 294.2" fill="none" stroke="#e87ba4" stroke-width="1.5"/><text x="802.0" y="294.2" dy="0.35em" font-size="12.5" fill="#3a3743">Random</text></g><g class="end-label" data-name="All sim data (10 real + 1,200 sim)"><path d="M787.0 294.2 L793.0 294.2 L798.0 312.7" fill="none" stroke="#8a8694" stroke-width="1.5" stroke-dasharray="2 2"/><text x="802.0" y="312.7" dy="0.35em" font-size="12.5" fill="#3a3743">All sim data</text></g><g class="end-label" data-name="10 real demos only"><path d="M787.0 326.5 L793.0 326.5 L798.0 331.2" fill="none" stroke="#a9a5b2" stroke-width="1.5" stroke-dasharray="2 2"/><text x="802.0" y="331.2" dy="0.35em" font-size="12.5" fill="#3a3743">10 real demos only</text></g></svg>
+          <div class="chart-tip" hidden></div>
+        </div>
+        <figcaption class="chart-note">10 real demonstrations per task; each curation method selects 600 of 1,200 simulated demonstrations; 40 trials per policy.</figcaption>
+      </figure>
+      <details class="chart-values">
+        <summary>Show values</summary>
+        <div class="values-scroll">
+          <table class="values">
+            <caption class="vh">Real-robot success rate (%)</caption>
+            <thead><tr><th scope="col">Method</th><th scope="col" class="num">Peg</th><th scope="col" class="num">StackCube</th><th scope="col" class="num">CupCake</th><th scope="col" class="num">Average</th></tr></thead>
+            <tbody>
+              <tr class="ours"><th scope="row">TUCO (ours)</th><td class="num">82.5</td><td class="num">75.0</td><td class="num">100.0</td><td class="num">85.8</td></tr>
+              <tr><th scope="row">CUPID</th><td class="num">75.0</td><td class="num">65.0</td><td class="num">80.0</td><td class="num">73.3</td></tr>
+              <tr><th scope="row">DataMIL</th><td class="num">22.5</td><td class="num">65.0</td><td class="num">100.0</td><td class="num">62.5</td></tr>
+              <tr><th scope="row">FAKTUAL</th><td class="num">10.0</td><td class="num">75.0</td><td class="num">100.0</td><td class="num">61.7</td></tr>
+              <tr><th scope="row">Success Similarity</th><td class="num">5.0</td><td class="num">50.0</td><td class="num">60.0</td><td class="num">38.3</td></tr>
+              <tr><th scope="row">Random</th><td class="num">7.5</td><td class="num">57.5</td><td class="num">12.5</td><td class="num">25.8</td></tr>
+              <tr><th scope="row">All sim data (10 real + 1,200 sim)</th><td class="num">17.5</td><td class="num">40.0</td><td class="num">20.0</td><td class="num">25.8</td></tr>
+              <tr><th scope="row">10 real demos only</th><td class="num">15.0</td><td class="num">35.0</td><td class="num">0.0</td><td class="num">16.7</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+
+      <ul class="points findings">
+        <li><strong>Curation matters more than quantity.</strong> With 10 real demonstrations, adding all 1,200 simulated demonstrations lifts average success from 16.7% to 25.8%, a random half gives the same 25.8%, and the half selected by TUCO gives 85.8%.</li>
+        <li><strong>Closed-loop influence is what transfers.</strong> On Peg, the most contact-intensive task, criteria based on similarity, validation loss, or diversity stay at or below 22.5%, while the two influence-based methods, CUPID and TUCO, reach 75.0% and 82.5%.</li>
+        <li><strong>Coverage adds to utility.</strong> TUCO improves over utility-only ranking (CUPID) on every task, by 12.5 pp on average.</li>
+      </ul>
+
+      <div class="rollouts" role="group" aria-label="Real-robot rollouts">
+        <div class="rollout-row">
+          <div class="row-head">
+            <h3 class="row-label">Insert the peg</h3>
+            <button class="row-play" type="button" aria-pressed="false" hidden>
+              <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>
+              <svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>
+              <span class="row-play-text">Play row</span><span class="vh"> (Insert the peg, all four clips)</span>
+            </button>
+          </div>
+          <div class="row-clips">
+            <figure class="clip is-ours">
+              <figcaption class="clip-head"><span class="clip-name">TUCO (ours)</span> <span class="clip-rate">82.5%</span></figcaption>
+              <div class="clip-media">
+                <video muted loop playsinline controls preload="none" poster="assets/rollouts/peg_tuco_success.jpg" width="406" height="720" aria-label="Insert the peg, TUCO (ours): successful trial">
+                  <source src="assets/rollouts/peg_tuco_success.mp4" type="video/mp4">
+                </video>
+              </div>
+            </figure>
+            <figure class="clip">
+              <figcaption class="clip-head"><span class="clip-name">All sim data</span> <span class="clip-rate">17.5%</span></figcaption>
+              <div class="clip-media">
+                <video muted loop playsinline controls preload="none" poster="assets/rollouts/peg_fullpool_fail.jpg" width="406" height="720" aria-label="Insert the peg, All sim data: failed trial">
+                  <source src="assets/rollouts/peg_fullpool_fail.mp4" type="video/mp4">
+                </video>
+              </div>
+            </figure>
+            <figure class="clip">
+              <figcaption class="clip-head"><span class="clip-name">10 real demos only</span> <span class="clip-rate">15.0%</span></figcaption>
+              <div class="clip-media">
+                <video muted loop playsinline controls preload="none" poster="assets/rollouts/peg_real10_fail.jpg" width="406" height="720" aria-label="Insert the peg, 10 real demos only: failed trial">
+                  <source src="assets/rollouts/peg_real10_fail.mp4" type="video/mp4">
+                </video>
+              </div>
+            </figure>
+            <figure class="clip">
+              <figcaption class="clip-head"><span class="clip-name">CUPID</span> <span class="clip-rate">75.0%</span></figcaption>
+              <div class="clip-media">
+                <video muted loop playsinline controls preload="none" poster="assets/rollouts/peg_cupid_fail.jpg" width="406" height="720" aria-label="Insert the peg, CUPID: failed trial">
+                  <source src="assets/rollouts/peg_cupid_fail.mp4" type="video/mp4">
+                </video>
+              </div>
+            </figure>
+          </div>
+        </div>
+        <div class="rollout-row">
+          <div class="row-head">
+            <h3 class="row-label">Stack the cube</h3>
+            <button class="row-play" type="button" aria-pressed="false" hidden>
+              <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>
+              <svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>
+              <span class="row-play-text">Play row</span><span class="vh"> (Stack the cube, all four clips)</span>
+            </button>
+          </div>
+          <div class="row-clips">
+            <figure class="clip is-ours">
+              <figcaption class="clip-head"><span class="clip-name">TUCO (ours)</span> <span class="clip-rate">75.0%</span></figcaption>
+              <div class="clip-media">
+                <video muted loop playsinline controls preload="none" poster="assets/rollouts/stackcube_tuco_success.jpg" width="334" height="720" aria-label="Stack the cube, TUCO (ours): successful trial">
+                  <source src="assets/rollouts/stackcube_tuco_success.mp4" type="video/mp4">
+                </video>
+              </div>
+            </figure>
+            <figure class="clip">
+              <figcaption class="clip-head"><span class="clip-name">All sim data</span> <span class="clip-rate">40.0%</span></figcaption>
+              <div class="clip-media">
+                <video muted loop playsinline controls preload="none" poster="assets/rollouts/stackcube_fullpool_fail.jpg" width="334" height="720" aria-label="Stack the cube, All sim data: failed trial">
+                  <source src="assets/rollouts/stackcube_fullpool_fail.mp4" type="video/mp4">
+                </video>
+              </div>
+            </figure>
+            <figure class="clip">
+              <figcaption class="clip-head"><span class="clip-name">10 real demos only</span> <span class="clip-rate">35.0%</span></figcaption>
+              <div class="clip-media">
+                <video muted loop playsinline controls preload="none" poster="assets/rollouts/stackcube_real10_fail.jpg" width="334" height="720" aria-label="Stack the cube, 10 real demos only: failed trial">
+                  <source src="assets/rollouts/stackcube_real10_fail.mp4" type="video/mp4">
+                </video>
+              </div>
+            </figure>
+            <figure class="clip">
+              <figcaption class="clip-head"><span class="clip-name">CUPID</span> <span class="clip-rate">65.0%</span></figcaption>
+              <div class="clip-media">
+                <video muted loop playsinline controls preload="none" poster="assets/rollouts/stackcube_cupid_fail.jpg" width="334" height="720" aria-label="Stack the cube, CUPID: failed trial">
+                  <source src="assets/rollouts/stackcube_cupid_fail.mp4" type="video/mp4">
+                </video>
+              </div>
+            </figure>
+          </div>
+        </div>
+        <div class="rollout-row">
+          <div class="row-head">
+            <h3 class="row-label">Place the cupcake</h3>
+            <button class="row-play" type="button" aria-pressed="false" hidden>
+              <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>
+              <svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>
+              <span class="row-play-text">Play row</span><span class="vh"> (Place the cupcake, all four clips)</span>
+            </button>
+          </div>
+          <div class="row-clips">
+            <figure class="clip is-ours">
+              <figcaption class="clip-head"><span class="clip-name">TUCO (ours)</span> <span class="clip-rate">100.0%</span></figcaption>
+              <div class="clip-media">
+                <video muted loop playsinline controls preload="none" poster="assets/rollouts/cupcake_tuco_success.jpg" width="406" height="720" aria-label="Place the cupcake, TUCO (ours): successful trial">
+                  <source src="assets/rollouts/cupcake_tuco_success.mp4" type="video/mp4">
+                </video>
+              </div>
+            </figure>
+            <figure class="clip">
+              <figcaption class="clip-head"><span class="clip-name">All sim data</span> <span class="clip-rate">20.0%</span></figcaption>
+              <div class="clip-media">
+                <video muted loop playsinline controls preload="none" poster="assets/rollouts/cupcake_fullpool_fail.jpg" width="406" height="720" aria-label="Place the cupcake, All sim data: failed trial">
+                  <source src="assets/rollouts/cupcake_fullpool_fail.mp4" type="video/mp4">
+                </video>
+              </div>
+            </figure>
+            <figure class="clip">
+              <figcaption class="clip-head"><span class="clip-name">10 real demos only</span> <span class="clip-rate">0.0%</span></figcaption>
+              <div class="clip-media">
+                <video muted loop playsinline controls preload="none" poster="assets/rollouts/cupcake_real10_fail.jpg" width="406" height="720" aria-label="Place the cupcake, 10 real demos only: failed trial">
+                  <source src="assets/rollouts/cupcake_real10_fail.mp4" type="video/mp4">
+                </video>
+              </div>
+            </figure>
+            <figure class="clip">
+              <figcaption class="clip-head"><span class="clip-name">CUPID</span> <span class="clip-rate">80.0%</span></figcaption>
+              <div class="clip-media">
+                <video muted loop playsinline controls preload="none" poster="assets/rollouts/cupcake_cupid_fail.jpg" width="406" height="720" aria-label="Place the cupcake, CUPID: failed trial">
+                  <source src="assets/rollouts/cupcake_cupid_fail.mp4" type="video/mp4">
+                </video>
+              </div>
+            </figure>
+          </div>
+        </div>
+      </div>
+      <p class="caption">The TUCO column shows a successful trial; the baseline columns each show a failure case.</p>
+    </section>
+
+    <section class="section" id="simulation" aria-labelledby="sim-h">
+      <h2 id="sim-h">Simulation Experiments</h2>
+      <p class="intro">Real-robot trials are expensive, so we first validate the curation criterion in two simulated settings with the same protocol. A base policy is rolled out in the target domain, each method selects a subset of source demonstrations under a fixed budget, a fresh policy is trained on that subset together with all target data, and success is measured in the target domain, averaged over three seeds.</p>
+      <p><strong>Single-simulator (RoboMimic).</strong> Source and target are the same simulator, so this setting isolates the curation criterion from any domain gap. Following CUPID's protocol on Lift, Square, and Transport, TUCO is best or tied-best in 18 of 25 task–budget settings, and matches training on all data on Lift with only 25% of it.</p>
+      <figure class="fig">
+        <a class="zoom" href="assets/fig_single_sim_results-2000.jpg" data-full="assets/full/fig_single_sim_results.png">
+          <img src="assets/fig_single_sim_results-1200.jpg" srcset="assets/fig_single_sim_results-1200.jpg 1200w, assets/fig_single_sim_results-2000.jpg 2000w" sizes="(min-width: 992px) 960px, calc(100vw - 32px)" width="2000" height="792" loading="lazy" decoding="async" alt="Single-simulator RoboMimic results: policy success rate against the fraction of demonstrations filtered (Lift, Square, Transport) or selected (Square, Transport) for TUCO and eleven baselines.">
+        </a>
+      </figure>
+      <p><strong>Sim-to-sim (IsaacSim to MuJoCo).</strong> Demonstrations are generated in one simulator and the policy is evaluated in another, a controlled stand-in for the sim-to-real gap. On the same three tasks as the real-robot study, TUCO is best in 15 of 18 settings and above random selection in all 18. Adding the full IsaacSim pool even hurts CupCake, whereas a curated subset gives the best result on every task.</p>
+      <figure class="fig">
+        <a class="zoom" href="assets/fig_sim2sim_results-2000.jpg" data-full="assets/full/fig_sim2sim_results.png">
+          <img src="assets/fig_sim2sim_results-1200.jpg" srcset="assets/fig_sim2sim_results-1200.jpg 1200w, assets/fig_sim2sim_results-2000.jpg 2000w" sizes="(min-width: 992px) 960px, calc(100vw - 32px)" width="2000" height="827" loading="lazy" decoding="async" alt="Sim-to-sim results from IsaacSim to MuJoCo on Peg, StackCube, and CupCake: target-domain success rate against the share of source demonstrations selected, grouped into quality, utility, and diversity baselines, with target-only and full-source reference lines.">
+        </a>
+      </figure>
+    </section>
+
+    <section class="section" id="bibtex" aria-labelledby="bibtex-h">
+      <h2 id="bibtex-h">BibTeX</h2>
+      <div class="bib">
+        <button class="copy" type="button" data-copy="#bibtex-code" hidden>Copy</button>
+        <pre><code id="bibtex-code">@article{tuco2026,
+  title   = {{TUCO}: Curating Simulation Demonstrations for Sim-to-Real Robot Policy Co-Training},
+  author  = {Zhu, Ning and Zhao, Mengfei and Tang, Yikai and Sun, Zhangyujie and Li, Peihao and Ni, Dongyue and Jia, Jindou and Yang, Jianfei},
+  journal = {arXiv preprint arXiv:<span class="tbd">[TBD]</span>},
+  year    = {2026}
+}</code></pre>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<dialog class="lightbox" id="lightbox" aria-label="Enlarged figure">
+  <div class="lightbox-bar">
+    <a class="lightbox-full" href="#" target="_blank" rel="noopener">Full resolution</a>
+    <button class="lightbox-close" type="button" aria-label="Close">&times;</button>
+  </div>
+  <img alt="">
+</dialog>
+
+<script src="static/chart.js" defer></script>
+<script src="static/main.js" defer></script>
+</body>
+</html>
